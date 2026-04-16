@@ -13,20 +13,13 @@
   const db = firebase.firestore();
   const auth = firebase.auth();
 
-  // ✅ LOGIN FUNCTION (FIXED)
   function login() {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
     auth.signInWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        console.log("Login success:", userCredential.user);
-        alert("Login success");
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Error: " + err.message);
-      });
+      .then(() => alert("Login success"))
+      .catch(err => alert(err.message));
   }
 
   function logout() {
@@ -47,6 +40,11 @@
   function addGuest() {
     const name = document.getElementById("name").value;
     const room = document.getElementById("room").value;
+
+    if (!name || !room) {
+      alert("Enter all fields");
+      return;
+    }
 
     db.collection("guests").add({
       name,
