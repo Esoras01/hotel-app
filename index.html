@@ -75,8 +75,7 @@
     auth.signOut();
   }
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
+  auth.onAuthStateChanged(user => {loadRooms();    if (user) {
       document.getElementById("loginPage").classList.add("hidden");
       document.getElementById("appPage").classList.remove("hidden");
       loadGuests();
