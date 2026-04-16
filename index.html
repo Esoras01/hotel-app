@@ -18,8 +18,12 @@
     const password = document.getElementById("password").value.trim();
 
     auth.signInWithEmailAndPassword(email, password)
-      .then(() => alert("Login success"))
-      .catch(err => alert(err.message));
+      .then(() => {
+        alert("Login success");
+      })
+      .catch(err => {
+        alert(err.message);
+      });
   }
 
   function logout() {
