@@ -1,67 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hotel Manager</title>
+  <title>Hotel Manager Pro</title>
 
-  <!-- Firebase CDN -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
   <style>
-    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
-    h2 { color: #333; }
+    body { font-family: Arial; margin: 0; background: #eef2f7; }
+    .container { padding: 20px; }
     input, button { padding: 10px; margin: 5px; }
     button { background: #007bff; color: white; border: none; border-radius: 5px; }
     .guest { background: white; padding: 10px; margin: 10px 0; border-radius: 8px; }
+    .login { max-width: 300px; margin: 100px auto; text-align: center; }
+    .hidden { display: none; }
+    header { background: #007bff; color: white; padding: 15px; display: flex; justify-content: space-between; }
   </style>
 </head>
 
 <body>
 
-<h2>🏨 Hotel Manager</h2>
+<!-- LOGIN -->
+<div id="loginPage" class="login">
+  <h2>Hotel Login</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+</div>
 
-<input id="name" placeholder="Guest Name">
-<input id="room" placeholder="Room Number">
-<button onclick="addGuest()">Check-In</button>
+<!-- APP -->
+<div id="appPage" class="hidden">
 
-<h3>Guest List</h3>
-<div id="guestList"></div>
+<header>
+  <h3>🏨 Hotel Manager</h3>
+  <button onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+  <input id="name" placeholder="Guest Name">
+  <input id="room" placeholder="Room Number">
+  <button onclick="addGuest()">Check-In</button>
+
+  <h3>Guest List</h3>
+  <div id="guestList"></div>
+</div>
+
+</div>
 
 <script>
-  // 🔥 const firebaseConfig = {
-  apiKey: "AIzaSyBEKlu81rJxMqGEVUEPavV2tk00nfBwrXw",
-  authDomain: "hotelapp-49a02.firebaseapp.com",
-  projectId: "hotelapp-49a02",
-  storageBucket: "hotelapp-49a02.firebasestorage.app",
-  messagingSenderId: "59308487715",
-  appId: "1:59308487715:web:8cb7a19ced064d26622d96" YOUR FIREBASE CONFIG HERE
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "YOUR_KEY",
     authDomain: "YOUR_PROJECT.firebaseapp.com",
     projectId: "YOUR_PROJECT_ID"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
+
   const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(err => alert(err.message));
+  }
+
+  function logout() {
+    auth.signOut();
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("appPage").classList.remove("hidden");
+      loadGuests();
+    } else {
+      document.getElementById("loginPage").classList.remove("hidden");
+      document.getElementById("appPage").classList.add("hidden");
+    }
+  });
 
   function addGuest() {
     const name = document.getElementById("name").value;
     const room = document.getElementById("room").value;
 
-    if (!name || !room) {
-      alert("Enter all fields");
-      return;
-    }
-
     db.collection("guests").add({
-      name: name,
-      room: room,
+      name,
+      room,
       checkIn: new Date().toLocaleString()
     });
-
-    document.getElementById("name").value = "";
-    document.getElementById("room").value = "";
   }
 
   function deleteGuest(id) {
@@ -74,19 +105,17 @@
       list.innerHTML = "";
 
       snapshot.forEach(doc => {
-        const guest = doc.data();
+        const g = doc.data();
         list.innerHTML += `
           <div class="guest">
-            <b>${guest.name}</b> - Room ${guest.room}<br>
-            ${guest.checkIn}<br>
+            <b>${g.name}</b> - Room ${g.room}<br>
+            ${g.checkIn}<br>
             <button onclick="deleteGuest('${doc.id}')">Check-Out</button>
           </div>
         `;
       });
     });
   }
-
-  loadGuests();
 </script>
 
 </body>
